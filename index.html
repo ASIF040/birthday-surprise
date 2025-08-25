@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghibli Birthday Surprise - Magical Edition</title>
+
+    <!-- External Libraries -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Nunito:wght@300;400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* ==================== GLOBAL STYLES ==================== */
+        :root {
+            --kuroi-black: #141421;
+            --whales-tale: #0A5784;
+            --imperial-red: #F15152;
+            --ethereal-white: #F5F5F5;
+            --glimmering-gold: #FDEEA7;
+            --ethereal-ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--kuroi-black);
+            color: var(--ethereal-white);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Lora', serif;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .app {
+            position: relative;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* ==================== LOADING SCREEN ==================== */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--kuroi-black);
+            z-index: 9999;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(253, 238, 167, 0.3);
+            border-top-color: var(--glimmering-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        .loading-progress {
+            width: 200px;
+            height: 4px;
+            background: rgba(253, 238, 167, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 1rem auto;
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: var(--glimmering-gold);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(253, 238, 167, 0.5);
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ==================== GRAIN EFFECT ==================== */
+        .grain-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.05;
+            z-index: 1000;
+            mix-blend-mode: screen;
+        }
+
+        .grain-overlay::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjkiIG51bU9jdGF2ZXM9IjQiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjUiLz48L3N2Zz4=');
+            animation: grain 8s steps(10) infinite;
+        }
+
+        @keyframes grain {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            10% {
+                transform: translate(-5%, -10%);
+            }
+
+            30% {
+                transform: translate(3%, -15%);
+            }
+
+            50% {
+                transform: translate(12%, 9%);
+            }
+
+            70% {
+                transform: translate(9%, 4%);
+            }
+
+            90% {
+                transform: translate(-1%, 7%);
+            }
+        }
+
+        /* ==================== PARTICLES ==================== */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--glimmering-gold);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.6;
+            }
+
+            50% {
+                transform: translateY(-100px) translateX(30px) scale(1.2);
+                opacity: 0.8;
+            }
+
+            90% {
+                opacity: 0.6;
+            }
+        }
+
+        /* ==================== BACKGROUND GRADIENT ==================== */
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at top left, rgba(241, 81, 82, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(10, 87, 132, 0.4) 0%, transparent 50%),
+                linear-gradient(135deg, #141421 0%, #1a1a2e 100%);
+            animation: gradientShift 20s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            25% {
+                transform: scale(1.1) rotate(1deg);
+            }
+
+            50% {
+                transform: scale(1.05) rotate(-1deg);
+            }
+
+            75% {
+                transform: scale(1.08) rotate(0.5deg);
+            }
+        }
+
+        /* ==================== LANDING PAGE ==================== */
+        .landing-page {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .landing-content {
+            text-align: center;
+            z-index: 20;
+            padding: 2rem;
+        }
+
+        .landing-title {
+            font-size: clamp(2rem, 5vw, 4rem);
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeInUp 2s ease forwards;
+        }
+
+        .name-highlight {
+            color: var(--glimmering-gold);
+            text-shadow: 0 0 30px rgba(253, 238, 167, 0.5);
+        }
+
+        .landing-subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            opacity: 0;
+            animation: fadeInUp 2s ease 0.5s forwards;
+            color: rgba(245, 245, 245, 0.8);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ==================== BUTTERFLY ICON ==================== */
+        .butterfly-container {
+            margin: 3rem auto;
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .butterfly-icon {
+            width: 100%;
+            height: 100%;
+            color: var(--ethereal-white);
+            filter: drop-shadow(0 0 20px rgba(245, 245, 245, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        .butterfly-container:hover .butterfly-icon {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 30px rgba(253, 238, 167, 0.8));
+        }
+
+        .pulse-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--glimmering-gold);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s ease-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        /* ==================== GALLERY ==================== */
+        .gallery-container {
+            position: relative;
+            z-index: 10;
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .gallery-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--ethereal-white);
+        }
+
+        /* ==================== PHOTO CARD ==================== */
+        .photo-card {
+            position: relative;
+            margin: 4rem 0;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.5s var(--ethereal-ease);
+        }
+
+        .photo-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .photo-card.align-left {
+            margin-right: auto;
+            margin-left: 5%;
+            max-width: 70%;
+        }
+
+        .photo-card.align-right {
+            margin-left: auto;
+            margin-right: 5%;
+            max-width: 70%;
+        }
+
+        .photo-container {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                0 0 80px rgba(10, 87, 132, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .photo-container:hover {
+            transform: scale(1.02);
+        }
+
+        .photo-frame {
+            position: relative;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(245, 245, 245, 0.1), rgba(245, 245, 245, 0.05));
+            backdrop-filter: blur(10px);
+        }
+
+        /* ==================== IMAGE REVEAL STYLES ==================== */
+        .photo-image-wrapper {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(20, 20, 33, 0.9), rgba(10, 87, 132, 0.3));
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: all 0.5s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .photo-image.blurred {
+            filter: blur(20px) brightness(0.7);
+            transform: scale(1.1);
+        }
+
+        .photo-image.revealing {
+            filter: blur(0px) brightness(1);
+            transform: scale(1);
+        }
+
+        /* Image loading state */
+        .image-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .image-loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(253, 238, 167, 0.3);
+            border-top-color: var(--glimmering-gold);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .image-error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            padding: 2rem;
+            color: rgba(245, 245, 245, 0.6);
+        }
+
+        /* Reveal Hint */
+        .reveal-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--ethereal-white);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            border: 2px solid var(--glimmering-gold);
+            font-family: 'Lora', serif;
+            font-size: 1.1rem;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .photo-image.blurred~.reveal-hint {
+            opacity: 1;
+        }
+
+        /* Magical reveal overlays */
+        .reveal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Sparkle particles for reveal */
+        .sparkle-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--glimmering-gold);
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 10px var(--glimmering-gold);
+        }
+
+        /* Reveal animations */
+        .circular-reveal {
+            clip-path: circle(0% at 50% 50%);
+            animation: circularReveal 1.5s ease-out forwards;
+        }
+
+        @keyframes circularReveal {
+            to {
+                clip-path: circle(150% at 50% 50%);
+            }
+        }
+
+        .wipe-reveal {
+            clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+            animation: wipeReveal 1.2s ease-out forwards;
+        }
+
+        @keyframes wipeReveal {
+            to {
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            }
+        }
+
+        .spiral-reveal {
+            animation: spiralReveal 2s ease-out forwards;
+        }
+
+        @keyframes spiralReveal {
+            0% {
+                clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%);
+                transform: rotate(0deg) scale(1.1);
+            }
+
+            100% {
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+                transform: rotate(360deg) scale(1);
+            }
+        }
+
+        .dissolve-reveal {
+            animation: dissolveReveal 1.5s ease-out forwards;
+        }
+
+        @keyframes dissolveReveal {
+            0% {
+                opacity: 0;
+                filter: blur(20px) saturate(0);
+            }
+
+            50% {
+                opacity: 0.5;
+                filter: blur(10px) saturate(0.5);
+            }
+
+            100% {
+                opacity: 1;
+                filter: blur(0) saturate(1);
+            }
+        }
+
+        .zoom-reveal {
+            animation: zoomReveal 1s ease-out forwards;
+        }
+
+        @keyframes zoomReveal {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+                filter: blur(20px);
+            }
+
+            50% {
+                transform: scale(1.2);
+                filter: blur(5px);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+
+        .fragment-reveal {
+            animation: fragmentReveal 1.5s ease-out forwards;
+        }
+
+        @keyframes fragmentReveal {
+            0% {
+                transform: scale(1.5) rotate(10deg);
+                opacity: 0;
+                filter: blur(20px) hue-rotate(180deg);
+            }
+
+            50% {
+                transform: scale(1.1) rotate(-5deg);
+                filter: blur(10px) hue-rotate(90deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+                filter: blur(0) hue-rotate(0);
+            }
+        }
+
+        /* Water ripple effect */
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid var(--glimmering-gold);
+            opacity: 0;
+            animation: ripple 1.5s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+
+            100% {
+                width: 500px;
+                height: 500px;
+                opacity: 0;
+            }
+        }
+
+        .photo-content {
+            margin-top: 1.5rem;
+            padding: 0 1rem;
+        }
+
+        .photo-message {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .photo-date {
+            font-size: 0.9rem;
+            color: rgba(245, 245, 245, 0.6);
+            font-style: italic;
+        }
+
+        /* ==================== RUNE ICONS ==================== */
+        .photo-actions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 12px;
+            z-index: 15;
+        }
+
+        .rune-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(20, 20, 33, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(245, 245, 245, 0.2);
+            color: var(--ethereal-white);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rune-button:hover {
+            transform: scale(1.1) rotate(5deg);
+            border-color: var(--glimmering-gold);
+            box-shadow: 0 0 20px rgba(253, 238, 167, 0.5);
+        }
+
+        .rune-button.liked {
+            background: rgba(241, 81, 82, 0.3);
+            border-color: var(--imperial-red);
+        }
+
+        /* ==================== SECRET MESSAGE ==================== */
+        .secret-message {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(253, 238, 167, 0.1), rgba(253, 238, 167, 0.05));
+            border-radius: 8px;
+            border: 1px solid rgba(253, 238, 167, 0.3);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .secret-label {
+            display: block;
+            font-family: 'Lora', serif;
+            font-size: 0.9rem;
+            color: var(--glimmering-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        /* ==================== BIRTHDAY REVEAL ==================== */
+        .birthday-reveal {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 2rem;
+        }
+
+        .birthday-content {
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .birthday-title {
+            font-size: clamp(2rem, 5vw, 4rem);
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--glimmering-gold), var(--imperial-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s ease infinite;
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+
+            50% {
+                filter: brightness(1.2);
+            }
+        }
+
+        .birthday-message {
+            margin-bottom: 2rem;
+        }
+
+        .message-line {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .message-line:nth-child(1) {
+            animation-delay: 0.5s;
+        }
+
+        .message-line:nth-child(2) {
+            animation-delay: 0.7s;
+        }
+
+        .message-line:nth-child(3) {
+            animation-delay: 0.9s;
+        }
+
+        .message-line:nth-child(4) {
+            animation-delay: 1.1s;
+        }
+
+        .personal-message {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin: 2rem 0;
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+
+        .birthday-wishes {
+            font-size: 1.5rem;
+            color: var(--glimmering-gold);
+            margin-top: 2rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .birthday-sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--glimmering-gold);
+            border-radius: 50%;
+            animation: sparkle 3s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes sparkle {
+            0% {
+                transform: translateY(0) scale(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* ==================== NAVIGATION BUTTONS ==================== */
+        .nav-button {
+            position: fixed;
+            bottom: 2rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, rgba(253, 238, 167, 0.2), rgba(253, 238, 167, 0.1));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(253, 238, 167, 0.3);
+            border-radius: 50px;
+            color: var(--ethereal-white);
+            font-family: 'Lora', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(253, 238, 167, 0.3);
+            border-color: var(--glimmering-gold);
+        }
+
+        .nav-button.next {
+            right: 2rem;
+        }
+
+        .nav-button.back {
+            left: 2rem;
+        }
+
+        /* ==================== RESPONSIVE DESIGN ==================== */
+        @media (max-width: 768px) {
+
+            .photo-card.align-left,
+            .photo-card.align-right {
+                margin: 3rem auto;
+                max-width: 90%;
+            }
+
+            .gallery-container {
+                padding: 2rem 1rem;
+            }
+
+            .butterfly-container {
+                width: 80px;
+                height: 80px;
+            }
+
+            .nav-button {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .reveal-hint {
+                font-size: 0.9rem;
+                padding: 0.8rem 1.5rem;
+            }
+
+            .photo-image-wrapper {
+                min-height: 250px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // ==================== BIRTHDAY DATA ====================
+        const birthdayData = {
+            recipientName: "Sabnam",
+            photos: [
+                {
+                    id: 1,
+                    url: "photo_2025-08-24_23-09-38.jpg",
+                    message: "আমি তোমাকে অসংখ্য ভাবে ভালবেসেছি, অসংখ্যবার ভালবেসেছি, এক জীবনের পর অন্য জীবনেও ভালবেসেছি, বছরের পর বছর, সর্বদা, সব সময়",
+                    date: "July 2023",
+                    secretMessage: "You said the butterflies looked like they were dancing just for us!",
+                    revealAnimation: "circular"
+                },
+                {
+                    id: 2,
+                    url: "photo_2025-08-24_23-09-44.jpg",
+                    message: "তুমি যদি না দেখা দাও, কর আমায় হেলা, কেমন করে কাটে আমার এমন বাদল-বেলা",
+                    date: "August 2023",
+                    secretMessage: "I was so proud of you - you were shaking but you did it anyway!",
+                    revealAnimation: "wipe"
+                },
+                {
+                    id: 3,
+                    url: "photo_2025-08-24_23-09-46.jpg",
+                    message: "ভালোবাসা যেখানে গভীর, নত হওয়া সেখানে গৌরবের",
+                    date: "September 2023",
+                    secretMessage: "You made a wish on every shooting star we saw",
+                    revealAnimation: "spiral"
+                },
+                {
+                    id: 4,
+                    url: "photo_2025-08-24_23-10-25.jpg",
+                    message: "প্রেমের মধ্যে ভয় না থাকলে রস নিবিড় হয় না",
+                    date: "October 2023",
+                    secretMessage: "You ordered 5 different pastries 'just to try' 😄",
+                    revealAnimation: "dissolve"
+                },
+                {
+                    id: 5,
+                    url: "photo_2025-08-24_23-10-08.jpg",
+                    message: "এরা সুখের লাগি চাহে প্রেম, প্রেম মেলে না, শুধু সুখ চলে যায়",
+                    date: "November 2023",
+                    secretMessage: "You collected so many leaves that day!",
+                    revealAnimation: "zoom"
+                },
+                {
+                    id: 6,
+                    url: "photo_2025-08-24_23-09-47.jpg",
+                    message: "প্রেম যদি না জাগে, জীবন কিসের?",
+                    date: "December 2023",
+                    secretMessage: "We stayed until the last ray of light disappeared",
+                    revealAnimation: "fragment"
+                }
+            ],
+            finalMessage: "Thank you for being the light in our lives. Your kindness, laughter, and spirit make every day brighter. Here's to another year of adventures, dreams, and magical moments!"
+        };
+
+        // ==================== IMAGE PRELOADER HOOK ====================
+        const useImagePreloader = (images) => {
+            const [loadedImages, setLoadedImages] = useState({});
+            const [loadingProgress, setLoadingProgress] = useState(0);
+
+            useEffect(() => {
+                const preloadImages = async () => {
+                    let loaded = 0;
+                    const imagePromises = images.map((src) => {
+                        return new Promise((resolve) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                loaded++;
+                                setLoadingProgress((loaded / images.length) * 100);
+                                setLoadedImages(prev => ({ ...prev, [src]: true }));
+                                resolve(src);
+                            };
+                            img.onerror = () => {
+                                loaded++;
+                                setLoadingProgress((loaded / images.length) * 100);
+                                setLoadedImages(prev => ({ ...prev, [src]: false }));
+                                resolve(src);
+                            };
+                            img.src = src;
+                        });
+                    });
+
+                    await Promise.all(imagePromises);
+                };
+
+                if (images.length > 0) {
+                    preloadImages();
+                }
+            }, [images]);
+
+            return { loadedImages, loadingProgress };
+        };
+
+        // ==================== GRAIN EFFECT COMPONENT ====================
+        const GrainEffect = () => <div className="grain-overlay"></div>;
+
+        // ==================== PARTICLES COMPONENT ====================
+        const FloatingParticles = () => {
+            useEffect(() => {
+                const container = document.querySelector('.particles-container');
+                if (!container) return;
+
+                const particleCount = 30;
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 15 + 's';
+                    particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                    container.appendChild(particle);
+                }
+
+                return () => { container.innerHTML = ''; };
+            }, []);
+
+            return <div className="particles-container"></div>;
+        };
+
+        // ==================== LOADING SCREEN ====================
+        const LoadingScreen = ({ progress }) => (
+            <div className="loading-screen">
+                <div className="loading-content">
+                    <div className="loading-spinner"></div>
+                    <div className="loading-progress">
+                        <div className="loading-progress-bar" style={{ width: `${progress}%` }}></div>
+                    </div>
+                    <p className="loading-text">
+                        {progress < 100 ? `Loading magical memories... ${Math.round(progress)}%` : 'Almost ready...'}
+                    </p>
+                </div>
+            </div>
+        );
+
+        // ==================== LANDING PAGE COMPONENT ====================
+        const LandingPage = ({ recipientName, onEnter }) => {
+            const butterflyRef = useRef(null);
+            const [isReady, setIsReady] = useState(false);
+
+            useEffect(() => {
+                setTimeout(() => setIsReady(true), 2000);
+
+                if (butterflyRef.current) {
+                    gsap.to(butterflyRef.current, {
+                        y: -10,
+                        duration: 2,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: "power1.inOut"
+                    });
+                }
+            }, []);
+
+            const handleEnter = () => {
+                if (!isReady) return;
+
+                gsap.to(butterflyRef.current, {
+                    scale: 50,
+                    opacity: 0,
+                    rotation: 720,
+                    duration: 1.2,
+                    ease: "power3.in",
+                    onComplete: onEnter
+                });
+            };
+
+            return (
+                <div className="landing-page">
+                    <div className="gradient-bg"></div>
+                    <div className="landing-content">
+                        <h1 className="landing-title">
+                            A Surprise for <span className="name-highlight">{recipientName}</span>
+                        </h1>
+                        <p className="landing-subtitle">A collection of memories wrapped in magic</p>
+                        <div ref={butterflyRef} className="butterfly-container" onClick={handleEnter}>
+                            <svg className="butterfly-icon" viewBox="0 0 100 100">
+                                <path d="M50 40 Q30 20 20 40 T50 50 Q70 20 80 40 T50 50 M50 50 L50 70"
+                                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                <circle cx="50" cy="45" r="3" fill="currentColor" />
+                            </svg>
+                            {isReady && <div className="pulse-ring"></div>}
+                        </div>
+                        {isReady && <p style={{ opacity: 0.7 }}>Click the butterfly to begin</p>}
+                    </div>
+                </div>
+            );
+        };
+
+        // ==================== PHOTO CARD COMPONENT ====================
+        const PhotoCard = ({ photo, message, date, index, secretMessage, revealAnimation }) => {
+            const [isRevealed, setIsRevealed] = useState(false);
+            const [isLiked, setIsLiked] = useState(false);
+            const [imageRevealed, setImageRevealed] = useState(false);
+            const [imageLoading, setImageLoading] = useState(true);
+            const [imageError, setImageError] = useState(false);
+            const cardRef = useRef(null);
+            const imageRef = useRef(null);
+            const overlayRef = useRef(null);
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('visible');
+                            }
+                        });
+                    },
+                    { threshold: 0.1 }
+                );
+
+                if (cardRef.current) {
+                    observer.observe(cardRef.current);
+                }
+
+                return () => observer.disconnect();
+            }, []);
+
+            const createMagicalParticles = (x, y) => {
+                const colors = ['#FDEEA7', '#F15152', '#0A5784', '#F5F5F5'];
+                for (let i = 0; i < 20; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'sparkle-particle';
+                    particle.style.left = x + 'px';
+                    particle.style.top = y + 'px';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+                    if (overlayRef.current) {
+                        overlayRef.current.appendChild(particle);
+                    }
+
+                    const angle = (Math.PI * 2 * i) / 20;
+                    const velocity = 50 + Math.random() * 100;
+
+                    gsap.to(particle, {
+                        x: Math.cos(angle) * velocity,
+                        y: Math.sin(angle) * velocity,
+                        opacity: 0,
+                        scale: 0,
+                        duration: 1 + Math.random(),
+                        ease: "power2.out",
+                        onComplete: () => particle.remove()
+                    });
+                }
+            };
+
+            const createRippleEffect = (x, y) => {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        const ripple = document.createElement('div');
+                        ripple.className = 'ripple-effect';
+                        ripple.style.left = x - 250 + 'px';
+                        ripple.style.top = y - 250 + 'px';
+
+                        if (overlayRef.current) {
+                            overlayRef.current.appendChild(ripple);
+                        }
+
+                        setTimeout(() => ripple.remove(), 1500);
+                    }, i * 200);
+                }
+            };
+
+            const handleImageClick = (e) => {
+                if (imageRevealed || imageError) return;
+
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                createMagicalParticles(x, y);
+                createRippleEffect(x, y);
+
+                const animationClass = `${revealAnimation}-reveal`;
+                imageRef.current.classList.remove('blurred');
+                imageRef.current.classList.add('revealing', animationClass);
+
+                if (revealAnimation === 'spiral') {
+                    gsap.to(imageRef.current, {
+                        rotation: 360,
+                        duration: 2,
+                        ease: "power2.out"
+                    });
+                } else if (revealAnimation === 'fragment') {
+                    gsap.fromTo(imageRef.current,
+                        { scale: 1.5, rotation: 10 },
+                        { scale: 1, rotation: 0, duration: 1.5, ease: "back.out(1.7)" }
+                    );
+                }
+
+                setImageRevealed(true);
+
+                if (navigator.vibrate) {
+                    navigator.vibrate([50, 30, 50]);
+                }
+            };
+
+            const handleLike = () => {
+                setIsLiked(!isLiked);
+
+                const button = event.currentTarget;
+                const rect = button.getBoundingClientRect();
+
+                for (let i = 0; i < 6; i++) {
+                    const heart = document.createElement('div');
+                    heart.innerHTML = '❤️';
+                    heart.style.position = 'fixed';
+                    heart.style.left = rect.left + rect.width / 2 + 'px';
+                    heart.style.top = rect.top + rect.height / 2 + 'px';
+                    heart.style.pointerEvents = 'none';
+                    heart.style.fontSize = '20px';
+                    heart.style.zIndex = '9999';
+                    document.body.appendChild(heart);
+
+                    gsap.to(heart, {
+                        x: (Math.random() - 0.5) * 100,
+                        y: -100 - Math.random() * 100,
+                        opacity: 0,
+                        rotation: Math.random() * 360,
+                        duration: 1 + Math.random(),
+                        ease: "power2.out",
+                        onComplete: () => heart.remove()
+                    });
+                }
+            };
+
+            return (
+                <div ref={cardRef} className={`photo-card ${index % 2 === 0 ? 'align-left' : 'align-right'}`}>
+                    <div className="photo-container">
+                        <div className="photo-frame">
+                            <div className="photo-image-wrapper" onClick={handleImageClick}>
+                                {imageLoading && !imageError && (
+                                    <div className="image-loader">
+                                        <div className="image-loader-spinner"></div>
+                                    </div>
+                                )}
+
+                                {imageError ? (
+                                    <div className="image-error">
+                                        <p>📷</p>
+                                        <p>Image couldn't load</p>
+                                        <small>{photo.url}</small>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <img
+                                            ref={imageRef}
+                                            src={photo.url}
+                                            alt={`Memory ${index + 1}`}
+                                            className={`photo-image ${imageRevealed ? '' : 'blurred'}`}
+                                            onLoad={() => { setImageLoading(false); setImageError(false); }}
+                                            onError={() => { setImageLoading(false); setImageError(true); }}
+                                            style={{ display: imageLoading ? 'none' : 'block' }}
+                                        />
+                                        <div className="reveal-overlay" ref={overlayRef}></div>
+                                        {!imageRevealed && !imageLoading && (
+                                            <div className="reveal-hint">✨ Tap to reveal the memory ✨</div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="photo-actions">
+                            <button className={`rune-button ${isLiked ? 'liked' : ''}`} onClick={handleLike}>
+                                {isLiked ? '💖' : '🤍'}
+                            </button>
+                            {secretMessage && !isRevealed && imageRevealed && (
+                                <button className="rune-button" onClick={() => setIsRevealed(true)}>✨</button>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="photo-content">
+                        {imageRevealed || imageError ? (
+                            <>
+                                <p className="photo-message">{message}</p>
+                                <span className="photo-date">{date}</span>
+                                {isRevealed && secretMessage && (
+                                    <div className="secret-message">
+                                        <span className="secret-label">Secret Memory:</span>
+                                        <p>{secretMessage}</p>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <p className="photo-message" style={{ opacity: 0.5, fontStyle: 'italic' }}>
+                                A hidden memory awaits your touch...
+                            </p>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ==================== GALLERY COMPONENT ====================
+        const PhotoGallery = ({ photos, onComplete }) => {
+            useEffect(() => {
+                const handleScroll = () => {
+                    const scrolled = window.scrollY;
+                    const parallaxElements = document.querySelectorAll('.photo-card');
+
+                    parallaxElements.forEach((element, index) => {
+                        const speed = 0.5 + (index * 0.1);
+                        const yPos = -(scrolled * speed / 10);
+                        element.style.transform = `translateY(${yPos}px)`;
+                    });
+                };
+
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            return (
+                <div className="gallery-container">
+                    <div className="gallery-header">
+                        <h2 className="gallery-title">Your Memory Collection</h2>
+                        <p style={{ opacity: 0.7 }}>Each photo is hidden behind a magical veil - tap to reveal</p>
+                    </div>
+
+                    {photos.map((photo, index) => (
+                        <PhotoCard
+                            key={photo.id}
+                            photo={photo}
+                            message={photo.message}
+                            date={photo.date}
+                            index={index}
+                            secretMessage={photo.secretMessage}
+                            revealAnimation={photo.revealAnimation}
+                        />
+                    ))}
+
+                    <button className="nav-button next" onClick={onComplete}>
+                        See Your Birthday Surprise →
+                    </button>
+                </div>
+            );
+        };
+
+        // ==================== BIRTHDAY REVEAL COMPONENT ====================
+        const BirthdayReveal = ({ recipientName, personalMessage, onBack }) => {
+            useEffect(() => {
+                const duration = 3000;
+                const end = Date.now() + duration;
+
+                const frame = () => {
+                    confetti({
+                        particleCount: 2,
+                        angle: 60,
+                        spread: 55,
+                        origin: { x: 0 },
+                        colors: ['#F15152', '#0A5784', '#FDEEA7']
+                    });
+                    confetti({
+                        particleCount: 2,
+                        angle: 120,
+                        spread: 55,
+                        origin: { x: 1 },
+                        colors: ['#F15152', '#0A5784', '#FDEEA7']
+                    });
+
+                    if (Date.now() < end) {
+                        requestAnimationFrame(frame);
+                    }
+                };
+                frame();
+
+                const interval = setInterval(() => {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'birthday-sparkle';
+                    sparkle.style.left = Math.random() * 100 + '%';
+                    sparkle.style.animationDelay = Math.random() * 2 + 's';
+                    document.querySelector('.birthday-reveal').appendChild(sparkle);
+
+                    setTimeout(() => sparkle.remove(), 3000);
+                }, 300);
+
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <div className="birthday-reveal">
+                    <div className="birthday-content">
+                        <h1 className="birthday-title">🎉 Happy Birthday, {recipientName}! 🎂</h1>
+
+                        <div className="birthday-message">
+                            <p className="message-line">
+                                Assalāmu ʿalaykum dear Sabnam—al-ḥamdu lillāh for another year Allah has granted you.
+                            </p>
+                            <p className="message-line">
+                                Barakallāhu fī ʿumrik; may He bless your days with īmān, health, and halal happiness.
+                            </p>
+                            <p className="message-line">
+                                رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ (Q 2:201)
+                            </p>
+                            <p className="message-line">
+                                May every sunrise draw you nearer to Allah and make you of the people of Jannat-ul-Firdaws.
+                            </p>
+                        </div>
+
+                        {personalMessage && (
+                            <div className="personal-message">
+                                <p>{personalMessage}</p>
+                            </div>
+                        )}
+
+                        <div className="birthday-wishes">
+                            <p>May your new year be filled with magic ✨</p>
+                        </div>
+
+                        <button className="nav-button back" onClick={onBack}>← View Gallery Again</button>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==================== MAIN APP COMPONENT ====================
+        const App = () => {
+            const [currentView, setCurrentView] = useState('landing');
+            const [isLoading, setIsLoading] = useState(true);
+
+            const imageUrls = birthdayData.photos.map(photo => photo.url);
+            const { loadingProgress } = useImagePreloader(imageUrls);
+
+            useEffect(() => {
+                const minLoadingTime = 1500;
+                const startTime = Date.now();
+
+                const checkLoading = () => {
+                    const elapsedTime = Date.now() - startTime;
+                    if (elapsedTime >= minLoadingTime && loadingProgress >= 100) {
+                        setIsLoading(false);
+                    } else {
+                        setTimeout(checkLoading, 100);
+                    }
+                };
+
+                checkLoading();
+            }, [loadingProgress]);
+
+            if (isLoading) {
+                return <LoadingScreen progress={loadingProgress} />;
+            }
+
+            return (
+                <div className="app">
+                    <GrainEffect />
+                    <FloatingParticles />
+                    <div className="gradient-bg"></div>
+
+                    {currentView === 'landing' && (
+                        <LandingPage
+                            recipientName={birthdayData.recipientName}
+                            onEnter={() => setCurrentView('gallery')}
+                        />
+                    )}
+
+                    {currentView === 'gallery' && (
+                        <PhotoGallery
+                            photos={birthdayData.photos}
+                            onComplete={() => setCurrentView('birthday')}
+                        />
+                    )}
+
+                    {currentView === 'birthday' && (
+                        <BirthdayReveal
+                            recipientName={birthdayData.recipientName}
+                            personalMessage={birthdayData.finalMessage}
+                            onBack={() => setCurrentView('gallery')}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        // ==================== RENDER APP ====================
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
